@@ -1,0 +1,16 @@
+= cpdf
+
+:description: Codes about PB
+:url-repo: https://github.com/zzzsyyy/convGRU-CFD
+
+image:https://img.shields.io/badge/License-BSD-blue.svg[link=https://en.wikipedia.org/wiki/BSD_License]
+
+
+== TODO
+
+* [ ] SPOD
+* [x] convGRU
+* [x] data process
+* [x] plot
+* [ ] ...
+

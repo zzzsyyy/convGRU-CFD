@@ -1,0 +1,8 @@
+__pycache__/
+fig/
+*.dat
+*.png
+*.npy
+.ipynb_checkpoints/
+*.pt
+!n0012.dat
