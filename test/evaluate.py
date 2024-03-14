@@ -5,9 +5,12 @@ from torch.utils.data import DataLoader
 from dataset import CustomDataset  # Make sure this is implemented
 from convgru_network import ConvGRUNetwork
 from model_utils import load_model
-from plot import plot_comparison
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.colors import ListedColormap
+from plot import plot_true_pred_diff_plot, plot_true_pred_diff_gray, plot_save
+# cmap = ListedColormap(['white', 'black'])
+cmap='RdBu'
 
 def evaluate_model(model, dataloader, device):
     model.eval()
@@ -18,51 +21,21 @@ def evaluate_model(model, dataloader, device):
         for batch_idx, (i, targets, inputs) in enumerate(dataloader):
             inputs, targets = inputs.to(device), targets.to(device)
             outputs = model(inputs)
+            # save output to file
+            # np.save(f'output_{batch_idx}.npy', outputs.cpu().numpy())
+            # np.save(f'target_{batch_idx}.npy', targets.cpu().numpy())
+            # print("in",inputs.shape, "out", outputs.shape)
             # loss = criterion(outputs, targets)
             # total_loss += loss.item()
             # predictions = model(inputs)
             # plot_comparison(inputs, predictions, targets)
-            for j in range(5):
-                print(f"Plotting Sample {j} in batch {batch_idx}...")
-                _, axarr = plt.subplots(3, 5, figsize=(6*6, 3*5), constrained_layout=True)
-                plt.subplots_adjust(wspace=0.2, hspace=-0.8)
-                for n in range(5):
-                    if n == 0:  # Add labels only for the first column
-                        axarr[0][n].set_title("Target")
-                        axarr[1][n].set_title("Prediction")
-                        axarr[2][n].set_title("Diff")
-                    x1, y1, x2, y2 = 40, 50, 240, 150
-                    # x1, y1, x2, y2 = 0,0,500,200
-                    levels = np.linspace(0,1,30)
-                    tar_img = targets[j, n, 0].cpu().numpy()
-                    tar_img=(tar_img-tar_img.min())/(tar_img.max() - tar_img.min())
-                    im0=axarr[0][n].imshow(tar_img, origin='lower')
-                    axarr[0][n].set_xlim(x1, x2)
-                    axarr[0][n].set_ylim(y2, y1)
-                    axarr[0][n].axis("off")
-                    out_img = outputs[j, n, 0].cpu().detach().numpy()
-                    out_img=(out_img-out_img.min())/(out_img.max() - out_img.min())
-                    im1=axarr[1][n].imshow(out_img, origin='lower')
-                    axarr[1][n].set_xlim(x1, x2)
-                    axarr[1][n].set_ylim(y2, y1)
-                    axarr[1][n].axis("off")
-                    diff = (tar_img - out_img)
-                    # print(tar_img.max(), out_img.max())
-                    im2=axarr[2][n].imshow(diff, origin="lower")
-                    axarr[2][n].set_xlim(x1, x2)
-                    axarr[2][n].set_ylim(y2, y1)
-                    axarr[2][n].axis("off")
-                    if n == 4:  # For the last column, adjust the layout to accommodate the colorbar
-                        axarr[2][n].axis('on')
-                        axarr[2][n].get_xaxis().set_visible(False)
-                        axarr[2][n].get_yaxis().set_visible(False)
-                        axarr[2][n].set_frame_on(False)
-                plt.colorbar(im1, ax=axarr[1, :], location='right', shrink=0.6)
-                plt.colorbar(im0, ax=axarr[0, :], location='right', shrink=0.6)
-                plt.colorbar(im2, ax=axarr[2, :], location='right', shrink=0.6)
-                plt.show()
-                # break
-            break  # Remove this to visualize more batches
+
+            #======#
+            # plot_true_pred_diff_plot(outputs, targets, batch_idx, cutline=('y', 100))
+            # plot_true_pred_diff_gray(outputs, targets, batch_idx)
+            plot_save(outputs, targets, batch_idx, cutline=('x', 60), break_=True)
+            #======#
+            break
     return total_loss / len(dataloader)
 
 if __name__ == "__main__":
@@ -75,7 +48,7 @@ if __name__ == "__main__":
                         n_frames_output=5)  # Implement this with your test dataset
     test_dataloader = DataLoader(test_dataset, batch_size=5, shuffle=False)
 
-    model_path = "convgru_model40.pth"  # Update this path
+    model_path = "./models/convgru_model200.pt"  # Update this path
     model = ConvGRUNetwork(input_channels=1, hidden_channels=8, kernel_size=3)
     model = load_model(model, model_path).to(device)
 
